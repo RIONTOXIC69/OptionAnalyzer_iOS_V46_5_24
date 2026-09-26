@@ -1,68 +1,65 @@
-name: OptionAnalyzer iOS Diagnostic
+name: OptionAnalyzer iOS Build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  diagnose:
-    name: Diagnose Xcode Project
+  build:
     runs-on: macos-15
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Xcode environment
+      - name: Select Xcode 16.3
         run: |
-          echo "=== macOS ==="
-          sw_vers
-
-          echo "=== Xcode ==="
-          xcode-select -p
+          sudo xcode-select -s /Applications/Xcode_16.3.app
           xcodebuild -version
 
-          echo "=== SDKs ==="
-          xcodebuild -showsdks
-
-      - name: Inspect project
+      - name: Verify project files
         run: |
-          echo "=== Project ==="
+          pwd
           ls -la
-
-          echo "=== Xcode project ==="
           find . -maxdepth 2 -name "*.xcodeproj" -print
+          find . -maxdepth 3 -name "*.xcscheme" -print
 
-          echo "=== Project file ==="
-          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Validate project plist
+      - name: Build iOS app
         run: |
-          plutil -lint OptionAnalyzer.xcodeproj/project.pbxproj
+          set -o pipefail
 
-      - name: List Xcode project
-        run: |
-          xcodebuild \
-            -project OptionAnalyzer.xcodeproj \
-            -list
-
-      - name: Show build settings
-        run: |
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
-            -showBuildSettings \
-            -sdk iphoneos
+            -destination 'generic/platform=iOS' \
+            -configuration Debug \
+            -derivedDataPath "$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
 
-      - name: Check generic iOS destination
+      - name: Verify app
         run: |
-          xcodebuild \
-            -project OptionAnalyzer.xcodeproj \
-            -scheme OptionAnalyzer \
-            -showdestinations
+          echo "Checking build output..."
+          find build/Build/Products -maxdepth 2 -type d -name "*.app" -print
+          test -d build/Build/Products/Debug-iphoneos/OptionAnalyzer.app
 
-      - name: Diagnostic complete
+      - name: Package iOS app
         run: |
-          echo "Xcode project diagnostic completed."
+          mkdir -p artifacts
+
+          ditto \
+            build/Build/Products/Debug-iphoneos/OptionAnalyzer.app \
+            artifacts/OptionAnalyzer.app
+
+          cd artifacts
+          zip -r OptionAnalyzer-iOS-Debug.zip OptionAnalyzer.app
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: OptionAnalyzer-iOS-Debug
+          path: artifacts/OptionAnalyzer-iOS-Debug.zip
