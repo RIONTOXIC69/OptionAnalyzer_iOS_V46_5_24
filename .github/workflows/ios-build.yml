@@ -1,0 +1,52 @@
+name: OptionAnalyzer iOS Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Verify Xcode project
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Project files:"
+          ls -la
+          echo "Xcode project:"
+          find . -maxdepth 2 -name "*.xcodeproj" -print
+
+      - name: Build OptionAnalyzer
+        run: |
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
+            -sdk iphoneos \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Prepare build artifact
+        run: |
+          mkdir -p artifacts
+          cp -R \
+            build/Build/Products/Debug-iphoneos/OptionAnalyzer.app \
+            artifacts/OptionAnalyzer.app
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: OptionAnalyzer-iOS-Debug
+          path: artifacts/OptionAnalyzer.app
