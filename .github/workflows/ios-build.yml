@@ -8,45 +8,66 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Show Xcode version
-        run: xcodebuild -version
+      - name: Select Xcode 16.4
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app
+          xcodebuild -version
+
+      - name: Show available iOS SDKs
+        run: |
+          xcodebuild -showsdks
 
       - name: Verify Xcode project
         run: |
           echo "Current directory:"
           pwd
+
           echo "Project files:"
           ls -la
+
           echo "Xcode project:"
           find . -maxdepth 2 -name "*.xcodeproj" -print
 
       - name: Build OptionAnalyzer
         run: |
+          set -o pipefail
+
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
-            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
 
+      - name: Verify build product
+        run: |
+          echo "Build products:"
+          find build/Build/Products -maxdepth 2 -type d -name "*.app" -print
+
+          test -d build/Build/Products/Debug-iphoneos/OptionAnalyzer.app
+
       - name: Prepare build artifact
         run: |
           mkdir -p artifacts
-          cp -R \
+
+          ditto \
             build/Build/Products/Debug-iphoneos/OptionAnalyzer.app \
             artifacts/OptionAnalyzer.app
+
+          cd artifacts
+          zip -r OptionAnalyzer-iOS-Debug.zip OptionAnalyzer.app
 
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
           name: OptionAnalyzer-iOS-Debug
-          path: artifacts/OptionAnalyzer.app
+          path: artifacts/OptionAnalyzer-iOS-Debug.zip
