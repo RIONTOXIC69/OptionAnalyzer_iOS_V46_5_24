@@ -1,61 +1,83 @@
 name: OptionAnalyzer iOS Build
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
+    name: Build OptionAnalyzer
     runs-on: macos-15
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.4
+      - name: Show macOS and Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.4.app
+          sw_vers
+          echo "Xcode installations:"
+          ls -d /Applications/Xcode*.app || true
+          echo "Selected Xcode:"
+          xcode-select -p
           xcodebuild -version
 
-      - name: Show available iOS SDKs
+      - name: Inspect project
         run: |
-          xcodebuild -showsdks
-
-      - name: Verify Xcode project
-        run: |
-          echo "Current directory:"
+          echo "Working directory:"
           pwd
 
-          echo "Project files:"
+          echo "Project:"
           ls -la
 
           echo "Xcode project:"
           find . -maxdepth 2 -name "*.xcodeproj" -print
 
-      - name: Build OptionAnalyzer
+          echo "Schemes:"
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -list
+
+      - name: Verify Swift sources
+        run: |
+          echo "Swift files:"
+          find . -name "*.swift" -print
+
+          echo "Info.plist:"
+          plutil -lint Info.plist
+
+      - name: Build iOS app
         run: |
           set -o pipefail
+
+          rm -rf build
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
-            -destination 'generic/platform=iOS' \
+            -sdk iphoneos \
             -configuration Debug \
-            -derivedDataPath build \
+            -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
-      - name: Verify build product
+      - name: Verify .app
         run: |
-          echo "Build products:"
-          find build/Build/Products -maxdepth 2 -type d -name "*.app" -print
+          echo "Searching for OptionAnalyzer.app..."
 
-          test -d build/Build/Products/Debug-iphoneos/OptionAnalyzer.app
+          find build \
+            -type d \
+            -name "OptionAnalyzer.app" \
+            -print
 
-      - name: Prepare build artifact
+          test -d \
+            build/Build/Products/Debug-iphoneos/OptionAnalyzer.app
+
+      - name: Package iOS app
         run: |
           mkdir -p artifacts
 
@@ -64,7 +86,12 @@ jobs:
             artifacts/OptionAnalyzer.app
 
           cd artifacts
-          zip -r OptionAnalyzer-iOS-Debug.zip OptionAnalyzer.app
+
+          zip -r \
+            OptionAnalyzer-iOS-Debug.zip \
+            OptionAnalyzer.app
+
+          ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
