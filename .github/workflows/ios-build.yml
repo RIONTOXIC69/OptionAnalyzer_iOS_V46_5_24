@@ -1,3 +1,4 @@
+```yaml
 name: OptionAnalyzer iOS Build
 
 on:
@@ -14,23 +15,60 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.3
+      - name: Detect and select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.3.app
-          echo "Xcode:"
-          xcodebuild -version
-          echo "Developer directory:"
+          set -e
+
+          echo "=== Installed Xcode versions ==="
+          ls -1d /Applications/Xcode*.app 2>/dev/null || true
+
+          echo "=== Current developer directory ==="
+          xcode-select -p || true
+
+          echo "=== Selecting available Xcode ==="
+
+          XCODE_APP=""
+
+          for candidate in \
+            /Applications/Xcode_16.4.app \
+            /Applications/Xcode_16.3.app \
+            /Applications/Xcode_16.2.app \
+            /Applications/Xcode_16.1.app \
+            /Applications/Xcode_16.0.app \
+            /Applications/Xcode.app
+          do
+            if [ -d "$candidate" ]; then
+              XCODE_APP="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$XCODE_APP" ]; then
+            echo "ERROR: No supported Xcode installation was found."
+            echo "Available applications:"
+            ls -la /Applications
+            exit 1
+          fi
+
+          echo "Using Xcode: $XCODE_APP"
+
+          sudo xcode-select -s "$XCODE_APP"
+
+          echo "=== Selected Xcode ==="
           xcode-select -p
+          xcodebuild -version
 
       - name: Verify project
         run: |
-          echo "Working directory:"
+          set -e
+
+          echo "=== Working directory ==="
           pwd
 
-          echo "Project contents:"
+          echo "=== Project contents ==="
           ls -la
 
-          echo "Checking Xcode project:"
+          echo "=== Verify Xcode project ==="
           test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
@@ -39,24 +77,46 @@ jobs:
 
       - name: Show project information
         run: |
+          set -e
+
+          echo "=== Project information ==="
+
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
-            -scheme OptionAnalyzer \
             -list
 
-      - name: Clean build folder
+      - name: Verify scheme
         run: |
+          set -e
+
+          echo "=== Scheme files ==="
+
+          find OptionAnalyzer.xcodeproj \
+            -type f \
+            -name "*.xcscheme" \
+            -print
+
+          test -f \
+            OptionAnalyzer.xcodeproj/xcshareddata/xcschemes/OptionAnalyzer.xcscheme
+
+          echo "OptionAnalyzer scheme found."
+
+      - name: Clean build directory
+        run: |
+          set -e
+
           rm -rf "$PWD/build"
+          rm -rf "$PWD/artifacts"
+
           mkdir -p "$PWD/build"
+          mkdir -p "$PWD/artifacts"
 
-      - name: Diagnostic build settings
+      - name: Show build settings
         run: |
-          set -o pipefail
+          set -e
 
-          echo "=== Xcode ==="
-          xcodebuild -version
+          echo "=== Build settings ==="
 
-          echo "=== Build Settings ==="
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
@@ -67,42 +127,51 @@ jobs:
         run: |
           set -o pipefail
 
-          echo "=== Building OptionAnalyzer ==="
+          echo "=== Starting iOS build ==="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
             -configuration Debug \
-            -destination 'generic/platform=iOS' \
+            -destination "generic/platform=iOS" \
             -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
-      - name: Verify app
+      - name: Verify application
         run: |
-          echo "Searching for OptionAnalyzer.app..."
+          set -e
 
-          find build \
+          echo "=== Searching for OptionAnalyzer.app ==="
+
+          find "$PWD/build" \
             -type d \
             -name "OptionAnalyzer.app" \
             -print
 
-          test -d "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+          APP_PATH="$PWD/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
 
-          echo "OptionAnalyzer.app successfully created."
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: OptionAnalyzer.app was not created."
+            exit 1
+          fi
 
-          ls -lah \
-            "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+          echo "=== Application successfully created ==="
+          ls -lah "$APP_PATH"
 
-      - name: Package iOS app
+      - name: Package iOS application
         run: |
-          rm -rf artifacts
-          mkdir -p artifacts
+          set -e
+
+          APP_PATH="$PWD/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+
+          rm -rf artifacts/OptionAnalyzer.app
 
           ditto \
-            "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app" \
+            "$APP_PATH" \
             "artifacts/OptionAnalyzer.app"
 
           cd artifacts
@@ -111,7 +180,7 @@ jobs:
             OptionAnalyzer-iOS-Debug.zip \
             OptionAnalyzer.app
 
-          echo "Package:"
+          echo "=== Package created ==="
           ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
@@ -120,3 +189,4 @@ jobs:
           name: OptionAnalyzer-iOS-Debug
           path: artifacts/OptionAnalyzer-iOS-Debug.zip
           if-no-files-found: error
+```
