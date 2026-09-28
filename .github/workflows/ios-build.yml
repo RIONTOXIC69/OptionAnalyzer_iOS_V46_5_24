@@ -32,16 +32,7 @@ jobs:
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
-
-      - name: Test target build settings
-        run: |
-          xcodebuild \
-            -project OptionAnalyzer.xcodeproj \
-            -target OptionAnalyzer \
-            -configuration Debug \
-            -sdk iphoneos \
-            -showBuildSettings
-
+     
       - name: Build OptionAnalyzer target
         run: |
           set -o pipefail
