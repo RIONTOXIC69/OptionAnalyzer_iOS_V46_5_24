@@ -14,15 +14,12 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Detect and select Xcode
+      - name: Select available Xcode
         run: |
           set -e
 
-          echo "=== Installed Xcode versions ==="
+          echo "=== Installed Xcode ==="
           ls -1d /Applications/Xcode*.app 2>/dev/null || true
-
-          echo "=== Current developer directory ==="
-          xcode-select -p || true
 
           XCODE_APP=""
 
@@ -41,15 +38,14 @@ jobs:
           done
 
           if [ -z "$XCODE_APP" ]; then
-            echo "ERROR: No supported Xcode installation found."
+            echo "ERROR: No Xcode installation found."
             exit 1
           fi
 
-          echo "Using Xcode: $XCODE_APP"
+          echo "Using: $XCODE_APP"
 
           sudo xcode-select -s "$XCODE_APP"
 
-          echo "=== Selected Xcode ==="
           xcode-select -p
           xcodebuild -version
 
@@ -57,44 +53,26 @@ jobs:
         run: |
           set -e
 
-          echo "=== Working directory ==="
+          echo "=== Project ==="
           pwd
-
-          echo "=== Project files ==="
           ls -la
 
           test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-          echo "Xcode project verified."
+          echo "Project verified."
 
-      - name: Show project information
+      - name: Verify target
         run: |
           set -e
 
-          echo "=== Project information ==="
+          echo "=== Xcode targets ==="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
 
-      - name: Verify scheme
-        run: |
-          set -e
-
-          echo "=== Scheme files ==="
-
-          find OptionAnalyzer.xcodeproj \
-            -type f \
-            -name "*.xcscheme" \
-            -print
-
-          test -f \
-            OptionAnalyzer.xcodeproj/xcshareddata/xcschemes/OptionAnalyzer.xcscheme
-
-          echo "OptionAnalyzer scheme verified."
-
-      - name: Clean build directories
+      - name: Clean build
         run: |
           set -e
 
@@ -104,42 +82,19 @@ jobs:
           mkdir -p "$PWD/build"
           mkdir -p "$PWD/artifacts"
 
-      - name: Diagnose target
+      - name: Direct target build
         run: |
-          set +e
+          set -o pipefail
 
-          echo "=== Xcode version ==="
-          xcodebuild -version
-
-          echo "=== Available SDKs ==="
-          xcodebuild -showsdks
-
-          echo "=== Target build settings ==="
+          echo "======================================"
+          echo "DIRECT TARGET BUILD"
+          echo "======================================"
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -target OptionAnalyzer \
             -configuration Debug \
             -sdk iphoneos \
-            -showBuildSettings
-
-          STATUS=$?
-
-          echo "Target diagnostic exit code: $STATUS"
-
-          exit 0
-
-      - name: Build OptionAnalyzer
-        run: |
-          set -o pipefail
-
-          echo "=== Starting iOS build ==="
-
-          xcodebuild \
-            -project OptionAnalyzer.xcodeproj \
-            -scheme OptionAnalyzer \
-            -configuration Debug \
-            -destination "generic/platform=iOS" \
             -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -151,7 +106,7 @@ jobs:
         run: |
           set -e
 
-          echo "=== Searching for application ==="
+          echo "=== Searching for OptionAnalyzer.app ==="
 
           find "$PWD/build" \
             -type d \
@@ -162,20 +117,19 @@ jobs:
 
           if [ ! -d "$APP_PATH" ]; then
             echo "ERROR: OptionAnalyzer.app was not created."
+            echo "=== Build directory ==="
+            find "$PWD/build" -maxdepth 5 -print
             exit 1
           fi
 
-          echo "=== Application successfully created ==="
-
+          echo "=== APP CREATED SUCCESSFULLY ==="
           ls -lah "$APP_PATH"
 
-      - name: Package iOS application
+      - name: Package application
         run: |
           set -e
 
           APP_PATH="$PWD/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
-
-          rm -rf artifacts/OptionAnalyzer.app
 
           ditto \
             "$APP_PATH" \
@@ -187,8 +141,7 @@ jobs:
             OptionAnalyzer-iOS-Debug.zip \
             OptionAnalyzer.app
 
-          echo "=== Package created ==="
-
+          echo "=== PACKAGE CREATED ==="
           ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
