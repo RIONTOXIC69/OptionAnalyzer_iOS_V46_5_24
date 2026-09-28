@@ -1,4 +1,3 @@
-```yaml
 name: OptionAnalyzer iOS Build
 
 on:
@@ -221,4 +220,4 @@ jobs:
           name: OptionAnalyzer-iOS-Debug
           path: artifacts/OptionAnalyzer-iOS-Debug.zip
           if-no-files-found: error
-```
+
