@@ -27,29 +27,47 @@ jobs:
           echo "Working directory:"
           pwd
 
-          echo "Project:"
-          ls -la OptionAnalyzer.xcodeproj
+          echo "Project contents:"
+          ls -la
+
+          echo "Checking Xcode project:"
+          test -d OptionAnalyzer.xcodeproj
+          test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
           echo "Project file:"
           ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
-
-          test -d OptionAnalyzer.xcodeproj
-          test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
       - name: Show project information
         run: |
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
             -list
 
       - name: Clean build folder
         run: |
-          rm -rf build
-          mkdir -p build
+          rm -rf "$PWD/build"
+          mkdir -p "$PWD/build"
+
+      - name: Diagnostic build settings
+        run: |
+          set -o pipefail
+
+          echo "=== Xcode ==="
+          xcodebuild -version
+
+          echo "=== Build Settings ==="
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
+            -configuration Debug \
+            -showBuildSettings
 
       - name: Build OptionAnalyzer
         run: |
           set -o pipefail
+
+          echo "=== Building OptionAnalyzer ==="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
