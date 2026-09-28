@@ -1,4 +1,4 @@
-name: Diagnose OptionAnalyzer Xcode Project
+name: OptionAnalyzer iOS Build
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  diagnose:
+  build:
     runs-on: macos-15
 
     steps:
@@ -17,81 +17,66 @@ jobs:
       - name: Select Xcode 16.3
         run: |
           sudo xcode-select -s /Applications/Xcode_16.3.app
-          echo "Xcode:"
           xcodebuild -version
 
-      - name: Inspect project files
+      - name: Verify project
         run: |
-          echo "Working directory:"
-          pwd
+          test -d OptionAnalyzer.xcodeproj
+          test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
           echo "Project:"
           ls -la OptionAnalyzer.xcodeproj
 
-          echo "pbxproj:"
-          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
-
-          echo "First 120 lines:"
-          sed -n '1,120p' OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Validate pbxproj syntax
+      - name: Show targets
         run: |
-          plutil -lint OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Check project file structure
-        run: |
-          grep -n "PBXProject" OptionAnalyzer.xcodeproj/project.pbxproj
-          grep -n "PBXNativeTarget" OptionAnalyzer.xcodeproj/project.pbxproj
-          grep -n "XCConfigurationList" OptionAnalyzer.xcodeproj/project.pbxproj
-          grep -n "XCBuildConfiguration" OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Inspect target names
-        run: |
-          echo "Native targets:"
-          grep -n "isa = PBXNativeTarget" OptionAnalyzer.xcodeproj/project.pbxproj
-
-          echo "Target name:"
-          grep -n "name = OptionAnalyzer" OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Check source references
-        run: |
-          echo "Swift files:"
-          find . -type f -name "*.swift" -print
-
-          echo "Referenced Swift files:"
-          grep -n "lastKnownFileType = sourcecode.swift" \
-            OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Check build configurations
-        run: |
-          grep -n "PRODUCT_BUNDLE_IDENTIFIER" \
-            OptionAnalyzer.xcodeproj/project.pbxproj
-
-          grep -n "SWIFT_VERSION" \
-            OptionAnalyzer.xcodeproj/project.pbxproj || true
-
-          grep -n "IPHONEOS_DEPLOYMENT_TARGET" \
-            OptionAnalyzer.xcodeproj/project.pbxproj || true
-
-      - name: Test xcodebuild project listing
-        run: |
-          set +e
-
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
 
-          STATUS=$?
-
-          echo "xcodebuild -list exit code: $STATUS"
-
-          if [ "$STATUS" -ne 0 ]; then
-            echo "xcodebuild -list failed."
-            exit "$STATUS"
-          fi
-
-      - name: Diagnose complete
+      - name: Test target build settings
         run: |
-          echo "======================================"
-          echo "PROJECT DIAGNOSTIC COMPLETED"
-          echo "======================================"
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -target OptionAnalyzer \
+            -configuration Debug \
+            -sdk iphoneos \
+            -showBuildSettings
+
+      - name: Build OptionAnalyzer target
+        run: |
+          set -o pipefail
+
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -target OptionAnalyzer \
+            -sdk iphoneos \
+            -configuration Debug \
+            -derivedDataPath "$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
+
+      - name: Verify app
+        run: |
+          echo "Searching for application:"
+          find build -type d -name "OptionAnalyzer.app" -print
+
+          test -d "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+
+      - name: Package iOS app
+        run: |
+          mkdir -p artifacts
+
+          ditto \
+            "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app" \
+            "artifacts/OptionAnalyzer.app"
+
+          cd artifacts
+          zip -r OptionAnalyzer-iOS-Debug.zip OptionAnalyzer.app
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: OptionAnalyzer-iOS-Debug
+          path: artifacts/OptionAnalyzer-iOS-Debug.zip
