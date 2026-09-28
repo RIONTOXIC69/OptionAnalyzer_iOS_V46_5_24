@@ -18,44 +18,63 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_16.4.app
           xcodebuild -version
+          xcode-select -p
 
       - name: Verify project
         run: |
+          echo "Project directory:"
+          pwd
+
+          echo "Project contents:"
+          ls -la
+
+          echo "Checking Xcode project:"
           test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-          echo "Project:"
-          ls -la OptionAnalyzer.xcodeproj
+          echo "project.pbxproj:"
+          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
 
-      - name: Show targets
+      - name: Show targets and schemes
         run: |
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
-     
-      - name: Build OptionAnalyzer target
+
+      - name: Build OptionAnalyzer
         run: |
           set -o pipefail
+
+          rm -rf "$PWD/build"
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
             -configuration Debug \
             -destination 'generic/platform=iOS' \
+            -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            SWIFT_VERSION=5.0 \
+            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
       - name: Verify app
         run: |
-          echo "Searching for application:"
+          echo "Searching for OptionAnalyzer.app:"
           find build -type d -name "OptionAnalyzer.app" -print
 
           test -d "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
 
+          echo "App successfully created:"
+          ls -lah "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+
       - name: Package iOS app
         run: |
+          rm -rf artifacts
           mkdir -p artifacts
 
           ditto \
@@ -63,10 +82,17 @@ jobs:
             "artifacts/OptionAnalyzer.app"
 
           cd artifacts
-          zip -r OptionAnalyzer-iOS-Debug.zip OptionAnalyzer.app
+
+          zip -r \
+            OptionAnalyzer-iOS-Debug.zip \
+            OptionAnalyzer.app
+
+          echo "Package created:"
+          ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
           name: OptionAnalyzer-iOS-Debug
           path: artifacts/OptionAnalyzer-iOS-Debug.zip
+          if-no-files-found: error
