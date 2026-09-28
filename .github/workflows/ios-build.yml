@@ -40,9 +40,8 @@ jobs:
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
-            -sdk iphoneos \
             -configuration Debug \
-            -derivedDataPath "$PWD/build" \
+            -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
