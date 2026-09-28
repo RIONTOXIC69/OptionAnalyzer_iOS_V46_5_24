@@ -1,4 +1,4 @@
-name: Diagnose OptionAnalyzer Xcode Project
+name: OptionAnalyzer iOS Build
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  diagnose:
+  build:
     runs-on: macos-15
 
     steps:
@@ -18,33 +18,63 @@ jobs:
         run: |
           sudo xcode-select -s /Applications/Xcode_16.3.app
           xcodebuild -version
+          swift --version
 
-      - name: Inspect project structure
+      - name: Verify project files
         run: |
-          echo "=== PROJECT ==="
+          echo "Current directory:"
+          pwd
+
+          echo "Project contents:"
+          ls -la
+
+          echo "Xcode project:"
           ls -la OptionAnalyzer.xcodeproj
 
-          echo "=== PBXPROJ SIZE ==="
-          wc -l OptionAnalyzer.xcodeproj/project.pbxproj
+          test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-          echo "=== PBXPROJ HEADER ==="
-          head -30 OptionAnalyzer.xcodeproj/project.pbxproj
-
-          echo "=== PBXPROJ FOOTER ==="
-          tail -30 OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Validate pbxproj
+      - name: Validate Xcode project
         run: |
-          echo "=== PLIST VALIDATION ==="
-          plutil -lint OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Inspect Xcode project
-        run: |
-          echo "=== XCODE LIST ==="
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
             -list
 
-      - name: Diagnose complete
+      - name: Build iOS Simulator app
         run: |
-          echo "Project diagnostic finished."
+          set -o pipefail
+
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath "$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
+
+      - name: Verify simulator app
+        run: |
+          echo "Searching for OptionAnalyzer.app:"
+          find build -type d -name "OptionAnalyzer.app" -print
+
+          test -d "build/Build/Products/Debug-iphonesimulator/OptionAnalyzer.app"
+
+      - name: Package simulator app
+        run: |
+          mkdir -p artifacts
+
+          ditto \
+            "build/Build/Products/Debug-iphonesimulator/OptionAnalyzer.app" \
+            "artifacts/OptionAnalyzer.app"
+
+          cd artifacts
+          zip -r OptionAnalyzer-iOS-Simulator-Debug.zip OptionAnalyzer.app
+
+      - name: Upload iOS build
+        uses: actions/upload-artifact@v4
+        with:
+          name: OptionAnalyzer-iOS-Simulator-Debug
+          path: artifacts/OptionAnalyzer-iOS-Simulator-Debug.zip
