@@ -11,25 +11,34 @@ jobs:
     runs-on: macos-15
 
     steps:
+
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Select available Xcode
-        run: |
-          set -e
+      # ------------------------------------------------------------
+      # XCODE
+      # ------------------------------------------------------------
 
-          echo "=== Installed Xcode versions ==="
+      - name: Select available Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " INSTALLED XCODE VERSIONS"
+          echo "=========================================="
+
           ls -1d /Applications/Xcode*.app 2>/dev/null || true
 
           XCODE_APP=""
 
           for candidate in \
-            /Applications/Xcode_16.4.app \
-            /Applications/Xcode_16.3.app \
-            /Applications/Xcode_16.2.app \
-            /Applications/Xcode_16.1.app \
-            /Applications/Xcode_16.0.app \
-            /Applications/Xcode.app
+            "/Applications/Xcode_16.4.app" \
+            "/Applications/Xcode_16.3.app" \
+            "/Applications/Xcode_16.2.app" \
+            "/Applications/Xcode_16.1.app" \
+            "/Applications/Xcode_16.0.app" \
+            "/Applications/Xcode.app"
           do
             if [ -d "$candidate" ]; then
               XCODE_APP="$candidate"
@@ -38,52 +47,122 @@ jobs:
           done
 
           if [ -z "$XCODE_APP" ]; then
-            echo "ERROR: No Xcode installation found."
+            echo "ERROR: No supported Xcode installation found."
             exit 1
           fi
 
-          echo "Using Xcode: $XCODE_APP"
+          echo "Using Xcode:"
+          echo "$XCODE_APP"
 
           sudo xcode-select -s "$XCODE_APP"
 
-          echo "=== Selected Xcode ==="
+          echo "=========================================="
+          echo " SELECTED XCODE"
+          echo "=========================================="
+
           xcode-select -p
           xcodebuild -version
 
+      # ------------------------------------------------------------
+      # XCODEGEN
+      # ------------------------------------------------------------
+
       - name: Install XcodeGen
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " INSTALLING XCODEGEN"
+          echo "=========================================="
 
           if command -v xcodegen >/dev/null 2>&1; then
-            echo "XcodeGen already installed."
+            echo "XcodeGen already available."
           else
-            echo "Installing XcodeGen..."
+            echo "Installing XcodeGen with Homebrew..."
+            brew update
             brew install xcodegen
           fi
 
-          echo "=== XcodeGen version ==="
+          echo "XcodeGen executable:"
+          command -v xcodegen
+
+          echo "XcodeGen version:"
           xcodegen version
 
+      # ------------------------------------------------------------
+      # VERIFY SOURCE FILES
+      # ------------------------------------------------------------
+
       - name: Verify source files
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
-          echo "=== Source files ==="
+          echo "=========================================="
+          echo " VERIFYING SOURCE FILES"
+          echo "=========================================="
 
-          test -f project.yml
-          test -f OptionAnalyzerApp.swift
-          test -f API/Models.swift
-          test -f API/OptionAnalyzerAPIClient.swift
-          test -f Views/ContentView.swift
-          test -f Views/MTFRow.swift
-          test -f Views/StageCard.swift
-          test -f Info.plist
+          required_files=(
+            "project.yml"
+            "OptionAnalyzerApp.swift"
+            "API/Models.swift"
+            "API/OptionAnalyzerAPIClient.swift"
+            "Views/ContentView.swift"
+            "Views/MTFRow.swift"
+            "Views/StageCard.swift"
+            "Info.plist"
+          )
 
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "ERROR: Required file missing:"
+              echo "$file"
+              exit 1
+            fi
+
+            echo "OK: $file"
+          done
+
+          echo ""
           echo "All required source files found."
 
-      - name: Generate fresh Xcode project
+      # ------------------------------------------------------------
+      # VERIFY XCODEGEN SPEC
+      # ------------------------------------------------------------
+
+      - name: Verify XcodeGen specification
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " VERIFYING project.yml"
+          echo "=========================================="
+
+          echo "--- project.yml ---"
+          cat project.yml
+          echo "--- end project.yml ---"
+
+          echo ""
+          echo "Running XcodeGen validation..."
+
+          xcodegen dump \
+            --spec project.yml \
+            > /tmp/OptionAnalyzer-xcodegen-dump.yml
+
+          test -s /tmp/OptionAnalyzer-xcodegen-dump.yml
+
+          echo "XcodeGen specification accepted."
+
+      # ------------------------------------------------------------
+      # GENERATE FRESH XCODE PROJECT
+      # ------------------------------------------------------------
+
+      - name: Generate fresh Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
 
           echo "=========================================="
           echo " GENERATING FRESH XCODE PROJECT"
@@ -91,60 +170,121 @@ jobs:
 
           rm -rf OptionAnalyzer.xcodeproj
 
+          echo "Running:"
+          echo "xcodegen generate --spec project.yml"
+
           xcodegen generate \
-            --spec project.yml \
-            --project OptionAnalyzer.xcodeproj
+            --spec project.yml
 
-          echo "=== Generated project ==="
-          find OptionAnalyzer.xcodeproj -maxdepth 3 -type f -print
+          echo ""
+          echo "=========================================="
+          echo " GENERATED PROJECT"
+          echo "=========================================="
 
-          test -f OptionAnalyzer.xcodeproj/project.pbxproj
+          if [ ! -d "OptionAnalyzer.xcodeproj" ]; then
+            echo "ERROR: OptionAnalyzer.xcodeproj was not generated."
+            exit 1
+          fi
 
+          if [ ! -f "OptionAnalyzer.xcodeproj/project.pbxproj" ]; then
+            echo "ERROR: project.pbxproj was not generated."
+            exit 1
+          fi
+
+          find OptionAnalyzer.xcodeproj \
+            -maxdepth 4 \
+            -type f \
+            -print
+
+          echo ""
           echo "Fresh Xcode project generated successfully."
 
-      - name: Verify generated project
-        run: |
-          set -e
+      # ------------------------------------------------------------
+      # VERIFY GENERATED PROJECT
+      # ------------------------------------------------------------
 
-          echo "=== Project information ==="
+      - name: Verify generated Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " VERIFYING GENERATED PROJECT"
+          echo "=========================================="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
 
-      - name: Verify generated scheme
-        run: |
-          set -e
+      # ------------------------------------------------------------
+      # VERIFY SCHEME
+      # ------------------------------------------------------------
 
-          echo "=== Generated schemes ==="
+      - name: Verify generated scheme
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " VERIFYING GENERATED SCHEME"
+          echo "=========================================="
+
+          SCHEME_PATH="OptionAnalyzer.xcodeproj/xcshareddata/xcschemes/OptionAnalyzer.xcscheme"
 
           find OptionAnalyzer.xcodeproj \
             -type f \
             -name "*.xcscheme" \
             -print
 
-          test -f \
-            OptionAnalyzer.xcodeproj/xcshareddata/xcschemes/OptionAnalyzer.xcscheme
+          if [ ! -f "$SCHEME_PATH" ]; then
+            echo "ERROR: Shared OptionAnalyzer scheme was not generated."
+            exit 1
+          fi
 
+          echo ""
           echo "OptionAnalyzer shared scheme found."
 
+          echo ""
+          echo "--- Scheme references ---"
+
+          grep -n \
+            -E "BlueprintIdentifier|BuildableName|BlueprintName" \
+            "$SCHEME_PATH" || true
+
+      # ------------------------------------------------------------
+      # CLEAN BUILD DATA
+      # ------------------------------------------------------------
+
       - name: Clean Xcode build data
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " CLEANING BUILD DATA"
+          echo "=========================================="
 
           rm -rf "$PWD/build"
           rm -rf "$PWD/artifacts"
-
           rm -rf "$HOME/Library/Developer/Xcode/DerivedData"
 
           mkdir -p "$PWD/build"
           mkdir -p "$PWD/artifacts"
 
-      - name: Show generated build settings
-        run: |
-          set -e
+          echo "Build directories prepared."
 
-          echo "=== Generated project build settings ==="
+      # ------------------------------------------------------------
+      # SHOW BUILD SETTINGS
+      # ------------------------------------------------------------
+
+      - name: Show generated build settings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " GENERATED BUILD SETTINGS"
+          echo "=========================================="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
@@ -152,7 +292,12 @@ jobs:
             -configuration Debug \
             -showBuildSettings
 
+      # ------------------------------------------------------------
+      # BUILD
+      # ------------------------------------------------------------
+
       - name: Build OptionAnalyzer
+        shell: bash
         run: |
           set -o pipefail
 
@@ -172,11 +317,18 @@ jobs:
             COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
-      - name: Locate application
-        run: |
-          set -e
+      # ------------------------------------------------------------
+      # LOCATE APP
+      # ------------------------------------------------------------
 
-          echo "=== Searching for OptionAnalyzer.app ==="
+      - name: Locate application
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " LOCATING OPTIONANALYZER.APP"
+          echo "=========================================="
 
           find "$PWD/build" \
             -type d \
@@ -187,17 +339,37 @@ jobs:
 
           if [ ! -d "$APP_PATH" ]; then
             echo "ERROR: OptionAnalyzer.app was not created."
+            echo ""
+            echo "Build directory contents:"
+            find "$PWD/build" -maxdepth 6 -print || true
             exit 1
           fi
 
-          echo "=== Application found ==="
+          echo ""
+          echo "Application found:"
+          echo "$APP_PATH"
+
           ls -lah "$APP_PATH"
 
+      # ------------------------------------------------------------
+      # PACKAGE
+      # ------------------------------------------------------------
+
       - name: Package iOS application
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
+          echo "=========================================="
+          echo " PACKAGING IOS APPLICATION"
+          echo "=========================================="
 
           APP_PATH="$PWD/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: Application bundle not found."
+            exit 1
+          fi
 
           rm -rf artifacts/OptionAnalyzer.app
 
@@ -207,12 +379,19 @@ jobs:
 
           cd artifacts
 
+          rm -f OptionAnalyzer-iOS-Debug.zip
+
           zip -r \
             OptionAnalyzer-iOS-Debug.zip \
             OptionAnalyzer.app
 
-          echo "=== Package created ==="
+          echo ""
+          echo "Package created:"
           ls -lh OptionAnalyzer-iOS-Debug.zip
+
+      # ------------------------------------------------------------
+      # UPLOAD ARTIFACT
+      # ------------------------------------------------------------
 
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
@@ -220,4 +399,3 @@ jobs:
           name: OptionAnalyzer-iOS-Debug
           path: artifacts/OptionAnalyzer-iOS-Debug.zip
           if-no-files-found: error
-
