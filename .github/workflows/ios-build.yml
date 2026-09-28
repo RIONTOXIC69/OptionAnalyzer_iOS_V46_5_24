@@ -17,35 +17,39 @@ jobs:
       - name: Select Xcode 16.4
         run: |
           sudo xcode-select -s /Applications/Xcode_16.4.app
+          echo "Xcode:"
           xcodebuild -version
+          echo "Developer directory:"
           xcode-select -p
 
       - name: Verify project
         run: |
-          echo "Project directory:"
+          echo "Working directory:"
           pwd
 
-          echo "Project contents:"
-          ls -la
+          echo "Project:"
+          ls -la OptionAnalyzer.xcodeproj
 
-          echo "Checking Xcode project:"
+          echo "Project file:"
+          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
+
           test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-          echo "project.pbxproj:"
-          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
-
-      - name: Show targets and schemes
+      - name: Show project information
         run: |
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -list
 
+      - name: Clean build folder
+        run: |
+          rm -rf build
+          mkdir -p build
+
       - name: Build OptionAnalyzer
         run: |
           set -o pipefail
-
-          rm -rf "$PWD/build"
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
@@ -55,22 +59,24 @@ jobs:
             -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM="" \
-            SWIFT_VERSION=5.0 \
-            IPHONEOS_DEPLOYMENT_TARGET=17.0 \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
       - name: Verify app
         run: |
-          echo "Searching for OptionAnalyzer.app:"
-          find build -type d -name "OptionAnalyzer.app" -print
+          echo "Searching for OptionAnalyzer.app..."
+
+          find build \
+            -type d \
+            -name "OptionAnalyzer.app" \
+            -print
 
           test -d "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
 
-          echo "App successfully created:"
-          ls -lah "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+          echo "OptionAnalyzer.app successfully created."
+
+          ls -lah \
+            "build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
 
       - name: Package iOS app
         run: |
@@ -87,7 +93,7 @@ jobs:
             OptionAnalyzer-iOS-Debug.zip \
             OptionAnalyzer.app
 
-          echo "Package created:"
+          echo "Package:"
           ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
