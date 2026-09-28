@@ -24,8 +24,6 @@ jobs:
           echo "=== Current developer directory ==="
           xcode-select -p || true
 
-          echo "=== Selecting available Xcode ==="
-
           XCODE_APP=""
 
           for candidate in \
@@ -43,9 +41,7 @@ jobs:
           done
 
           if [ -z "$XCODE_APP" ]; then
-            echo "ERROR: No supported Xcode installation was found."
-            echo "Available applications:"
-            ls -la /Applications
+            echo "ERROR: No supported Xcode installation found."
             exit 1
           fi
 
@@ -64,15 +60,13 @@ jobs:
           echo "=== Working directory ==="
           pwd
 
-          echo "=== Project contents ==="
+          echo "=== Project files ==="
           ls -la
 
-          echo "=== Verify Xcode project ==="
           test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-          echo "Project file:"
-          ls -lh OptionAnalyzer.xcodeproj/project.pbxproj
+          echo "Xcode project verified."
 
       - name: Show project information
         run: |
@@ -98,9 +92,9 @@ jobs:
           test -f \
             OptionAnalyzer.xcodeproj/xcshareddata/xcschemes/OptionAnalyzer.xcscheme
 
-          echo "OptionAnalyzer scheme found."
+          echo "OptionAnalyzer scheme verified."
 
-      - name: Clean build directory
+      - name: Clean build directories
         run: |
           set -e
 
@@ -110,17 +104,30 @@ jobs:
           mkdir -p "$PWD/build"
           mkdir -p "$PWD/artifacts"
 
-      - name: Show build settings
+      - name: Diagnose target
         run: |
-          set -e
+          set +e
 
-          echo "=== Build settings ==="
+          echo "=== Xcode version ==="
+          xcodebuild -version
+
+          echo "=== Available SDKs ==="
+          xcodebuild -showsdks
+
+          echo "=== Target build settings ==="
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
-            -scheme OptionAnalyzer \
+            -target OptionAnalyzer \
             -configuration Debug \
+            -sdk iphoneos \
             -showBuildSettings
+
+          STATUS=$?
+
+          echo "Target diagnostic exit code: $STATUS"
+
+          exit 0
 
       - name: Build OptionAnalyzer
         run: |
@@ -144,7 +151,7 @@ jobs:
         run: |
           set -e
 
-          echo "=== Searching for OptionAnalyzer.app ==="
+          echo "=== Searching for application ==="
 
           find "$PWD/build" \
             -type d \
@@ -159,6 +166,7 @@ jobs:
           fi
 
           echo "=== Application successfully created ==="
+
           ls -lah "$APP_PATH"
 
       - name: Package iOS application
@@ -180,6 +188,7 @@ jobs:
             OptionAnalyzer.app
 
           echo "=== Package created ==="
+
           ls -lh OptionAnalyzer-iOS-Debug.zip
 
       - name: Upload iOS build
