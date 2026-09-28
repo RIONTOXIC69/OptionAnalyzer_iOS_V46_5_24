@@ -17,28 +17,33 @@ jobs:
       - name: Select Xcode 16.3
         run: |
           sudo xcode-select -s /Applications/Xcode_16.3.app
+          echo "Xcode:"
           xcodebuild -version
+          echo "Swift:"
           swift --version
 
-      - name: Verify project files
+      - name: Verify project
         run: |
-          echo "Current directory:"
           pwd
-
-          echo "Project contents:"
           ls -la
-
-          echo "Xcode project:"
-          ls -la OptionAnalyzer.xcodeproj
-
+          test -d OptionAnalyzer.xcodeproj
           test -f OptionAnalyzer.xcodeproj/project.pbxproj
 
-      - name: Validate Xcode project
+      - name: Validate scheme
         run: |
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
             -list
+
+      - name: Test build settings
+        run: |
+          xcodebuild \
+            -project OptionAnalyzer.xcodeproj \
+            -scheme OptionAnalyzer \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -showBuildSettings
 
       - name: Build iOS Simulator app
         run: |
@@ -47,22 +52,22 @@ jobs:
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
             -scheme OptionAnalyzer \
-            -sdk iphonesimulator \
             -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath "$PWD/build" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
             build
 
-      - name: Verify simulator app
+      - name: Verify app
         run: |
           echo "Searching for OptionAnalyzer.app:"
           find build -type d -name "OptionAnalyzer.app" -print
 
           test -d "build/Build/Products/Debug-iphonesimulator/OptionAnalyzer.app"
 
-      - name: Package simulator app
+      - name: Package iOS app
         run: |
           mkdir -p artifacts
 
