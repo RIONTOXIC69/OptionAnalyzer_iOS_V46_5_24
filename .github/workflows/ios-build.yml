@@ -39,7 +39,7 @@ jobs:
 
           xcodebuild \
             -project OptionAnalyzer.xcodeproj \
-            -target OptionAnalyzer \
+            -scheme OptionAnalyzer \
             -sdk iphoneos \
             -configuration Debug \
             -derivedDataPath "$PWD/build" \
