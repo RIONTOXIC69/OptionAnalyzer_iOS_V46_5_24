@@ -1,249 +1,84 @@
-﻿ // !$*UTF8*$!
- {
- archiveVersion = 1;
- classes = {
- };
- objectVersion = 56;
- objects = {
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 56;
+    objects = {
 
- /* Begin PBXBuildFile section */
-        A10000010000000000000001 /* OptionAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* OptionAnalyzerApp.swift */; };
-        A10000010000000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000002 /* Models.swift */; };
-        A10000010000000000000003 /* OptionAnalyzerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000003 /* OptionAnalyzerAPIClient.swift */; };
-        A10000010000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000004 /* ContentView.swift */; };
-        A10000010000000000000005 /* MTFRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000005 /* MTFRow.swift */; };
-        A10000010000000000000006 /* StageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000006 /* StageCard.swift */; };
- /* End PBXBuildFile section */
+/* Begin PBXBuildFile section */
+        800000000000000000000001 /* OptionAnalyzerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000003 /* OptionAnalyzerApp.swift */; };
+        800000000000000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000004 /* Models.swift */; };
+        800000000000000000000003 /* OptionAnalyzerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000005 /* OptionAnalyzerAPIClient.swift */; };
+        800000000000000000000004 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000006 /* ContentView.swift */; };
+        800000000000000000000005 /* MTFRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000007 /* MTFRow.swift */; };
+        800000000000000000000006 /* StageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700000000000000000000008 /* StageCard.swift */; };
+/* End PBXBuildFile section */
 
- /* Begin PBXFileReference section */
-        A20000010000000000000001 /* OptionAnalyzerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionAnalyzerApp.swift; sourceTree = "<group>"; };
-        A20000010000000000000002 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-        A20000010000000000000003 /* OptionAnalyzerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionAnalyzerAPIClient.swift; sourceTree = "<group>"; };
-        A20000010000000000000004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-        A20000010000000000000005 /* MTFRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTFRow.swift; sourceTree = "<group>"; };
-        A20000010000000000000006 /* StageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StageCard.swift; sourceTree = "<group>"; };
-        A20000010000000000000007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-        A20000010000000000000008 /* OptionAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OptionAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
- /* End PBXFileReference section */
+/* Begin PBXFileReference section */
+        700000000000000000000001 /* OptionAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OptionAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        700000000000000000000002 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = SOURCE_ROOT; };
+        700000000000000000000003 /* OptionAnalyzerApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionAnalyzerApp.swift; sourceTree = SOURCE_ROOT; };
+        700000000000000000000004 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = SOURCE_ROOT; };
+        700000000000000000000005 /* OptionAnalyzerAPIClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionAnalyzerAPIClient.swift; sourceTree = SOURCE_ROOT; };
+        700000000000000000000006 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = SOURCE_ROOT; };
+        700000000000000000000007 /* MTFRow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTFRow.swift; sourceTree = SOURCE_ROOT; };
+        700000000000000000000008 /* StageCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StageCard.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
 
- /* Begin PBXFrameworksBuildPhase section */
-        A30000010000000000000001 /* Frameworks */ = {
-            isa = PBXFrameworksBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
- /* End PBXFrameworksBuildPhase section */
+/* Begin PBXFrameworksBuildPhase section */
+/* End PBXFrameworksBuildPhase section */
 
- /* Begin PBXGroup section */
-        A40000010000000000000001 = {
-            isa = PBXGroup;
-            children = (
-                A20000010000000000000001 /* OptionAnalyzerApp.swift */,
-                A40000010000000000000002 /* API */,
-                A40000010000000000000003 /* Views */,
-                A20000010000000000000007 /* Info.plist */,
-                A40000010000000000000004 /* Products */,
-            );
-            sourceTree = "<group>";
-        };
+/* Begin PBXGroup section */
+        600000000000000000000001 = {isa = PBXGroup; children = (
+                700000000000000000000003 /* OptionAnalyzerApp.swift */,
+                600000000000000000000002 /* API */,
+                600000000000000000000003 /* Views */,
+                700000000000000000000002 /* Info.plist */,
+                600000000000000000000004 /* Products */,
+        ); sourceTree = SOURCE_ROOT; };
+        600000000000000000000002 = {isa = PBXGroup; children = (
+                700000000000000000000004 /* Models.swift */,
+                700000000000000000000005 /* OptionAnalyzerAPIClient.swift */,
+        ); path = API; sourceTree = SOURCE_ROOT; };
+        600000000000000000000003 = {isa = PBXGroup; children = (
+                700000000000000000000006 /* ContentView.swift */,
+                700000000000000000000007 /* MTFRow.swift */,
+                700000000000000000000008 /* StageCard.swift */,
+        ); path = Views; sourceTree = SOURCE_ROOT; };
+        600000000000000000000004 = {isa = PBXGroup; children = (
+                700000000000000000000001 /* OptionAnalyzer.app */,
+        ); name = Products; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXGroup section */
 
-        A40000010000000000000002 /* API */ = {
-            isa = PBXGroup;
-            children = (
-                A20000010000000000000002 /* Models.swift */,
-                A20000010000000000000003 /* OptionAnalyzerAPIClient.swift */,
-            );
-            path = API;
-            sourceTree = "<group>";
-        };
+/* Begin PBXNativeTarget section */
+        500000000000000000000001 /* OptionAnalyzer */ = {isa = PBXNativeTarget; buildConfigurationList = 300000000000000000000001 /* Build configuration list for PBXNativeTarget OptionAnalyzer */; buildPhases = (900000000000000000000001 /* Sources */, 900000000000000000000002 /* Resources */,); buildRules = (); dependencies = (); name = OptionAnalyzer; productName = OptionAnalyzer; productReference = 700000000000000000000001 /* OptionAnalyzer.app */; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
 
-        A40000010000000000000003 /* Views */ = {
-            isa = PBXGroup;
-            children = (
-                A20000010000000000000004 /* ContentView.swift */,
-                A20000010000000000000005 /* MTFRow.swift */,
-                A20000010000000000000006 /* StageCard.swift */,
-            );
-            path = Views;
-            sourceTree = "<group>";
-        };
+/* Begin PBXProject section */
+        100000000000000000000001 /* Project object */ = {isa = PBXProject; attributes = {LastUpgradeCheck = 1600; TargetAttributes = {500000000000000000000001 = {CreatedOnToolsVersion = 16.0; }; }; }; buildConfigurationList = 200000000000000000000001 /* Build configuration list for PBXProject OptionAnalyzer */; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base,); mainGroup = 600000000000000000000001; productRefGroup = 600000000000000000000004; projectDirPath = ""; projectRoot = ""; targets = (500000000000000000000001 /* OptionAnalyzer */,); };
+/* End PBXProject section */
 
-        A40000010000000000000004 /* Products */ = {
-            isa = PBXGroup;
-            children = (
-                A20000010000000000000008 /* OptionAnalyzer.app */,
-            );
-            name = Products;
-            sourceTree = "<group>";
-        };
- /* End PBXGroup section */
+/* Begin PBXResourcesBuildPhase section */
+        900000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
 
- /* Begin PBXNativeTarget section */
-        A50000010000000000000001 /* OptionAnalyzer */ = {
-            isa = PBXNativeTarget;
-            buildConfigurationList = A60000010000000000000002 /* Build configuration list for OptionAnalyzer */;
-            buildPhases = (
-                A30000010000000000000002 /* Sources */,
-                A30000010000000000000003 /* Resources */,
-                A30000010000000000000001 /* Frameworks */,
-            );
-            buildRules = (
-            );
-            dependencies = (
-            );
-            name = OptionAnalyzer;
-            productName = OptionAnalyzer;
-            productReference = A20000010000000000000008 /* OptionAnalyzer.app */;
-            productType = "com.apple.product-type.application";
-        };
- /* End PBXNativeTarget section */
+/* Begin PBXSourcesBuildPhase section */
+        900000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (800000000000000000000001 /* OptionAnalyzerApp.swift in Sources */, 800000000000000000000002 /* Models.swift in Sources */, 800000000000000000000003 /* OptionAnalyzerAPIClient.swift in Sources */, 800000000000000000000004 /* ContentView.swift in Sources */, 800000000000000000000005 /* MTFRow.swift in Sources */, 800000000000000000000006 /* StageCard.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
 
- /* Begin PBXProject section */
-        A70000010000000000000001 /* Project object */ = {
-            isa = PBXProject;
-            attributes = {
-                LastUpgradeCheck = 1600;
-                TargetAttributes = {
-                    A50000010000000000000001 = {
-                        CreatedOnToolsVersion = 16.0;
-                    };
-                };
-            };
-            buildConfigurationList = A60000010000000000000001 /* Build configuration list for project */;
-            compatibilityVersion = "Xcode 14.0";
-            developmentRegion = en;
-            hasScannedForEncodings = 0;
-            knownRegions = (
-                en,
-                Base,
-            );
-            mainGroup = A40000010000000000000001;
-            productRefGroup = A40000010000000000000004 /* Products */;
-            projectDirPath = "";
-            projectRoot = "";
-            targets = (
-                A50000010000000000000001 /* OptionAnalyzer */,
-            );
-        };
- /* End PBXProject section */
+/* Begin XCBuildConfiguration section */
+        400000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+        400000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ALWAYS_SEARCH_USER_PATHS = NO; IPHONEOS_DEPLOYMENT_TARGET = 17.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+        400000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MARKETING_VERSION = 46.5.24; PRODUCT_BUNDLE_IDENTIFIER = com.optionanalyzer.mobile; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_EMIT_LOC_STRINGS = YES; }; name = Debug; };
+        400000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MARKETING_VERSION = 46.5.24; PRODUCT_BUNDLE_IDENTIFIER = com.optionanalyzer.mobile; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; SWIFT_EMIT_LOC_STRINGS = YES; }; name = Release; };
+/* End XCBuildConfiguration section */
 
- /* Begin PBXResourcesBuildPhase section */
-        A30000010000000000000003 /* Resources */ = {
-            isa = PBXResourcesBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
- /* End PBXResourcesBuildPhase section */
+/* Begin XCConfigurationList section */
+        200000000000000000000001 /* Build configuration list for PBXProject OptionAnalyzer */ = {isa = XCConfigurationList; buildConfigurations = (400000000000000000000001 /* Debug */, 400000000000000000000002 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+        300000000000000000000001 /* Build configuration list for PBXNativeTarget OptionAnalyzer */ = {isa = XCConfigurationList; buildConfigurations = (400000000000000000000003 /* Debug */, 400000000000000000000004 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
 
- /* Begin PBXSourcesBuildPhase section */
-        A30000010000000000000002 /* Sources */ = {
-            isa = PBXSourcesBuildPhase;
-            buildActionMask = 2147483647;
-            files = (
-                A10000010000000000000001 /* OptionAnalyzerApp.swift in Sources */,
-                A10000010000000000000002 /* Models.swift in Sources */,
-                A10000010000000000000003 /* OptionAnalyzerAPIClient.swift in Sources */,
-                A10000010000000000000004 /* ContentView.swift in Sources */,
-                A10000010000000000000005 /* MTFRow.swift in Sources */,
-                A10000010000000000000006 /* StageCard.swift in Sources */,
-            );
-            runOnlyForDeploymentPostprocessing = 0;
-        };
- /* End PBXSourcesBuildPhase section */
-
- /* Begin XCBuildConfiguration section */
-        A80000010000000000000001 /* Debug */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ALWAYS_SEARCH_USER_PATHS = NO;
-                CLANG_ENABLE_MODULES = YES;
-                CLANG_ENABLE_OBJC_ARC = YES;
-                GCC_C_LANGUAGE_STANDARD = gnu17;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                SDKROOT = iphoneos;
-                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-                SWIFT_VERSION = 5.0;
-            };
-            name = Debug;
-        };
-
-        A80000010000000000000002 /* Release */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ALWAYS_SEARCH_USER_PATHS = NO;
-                CLANG_ENABLE_MODULES = YES;
-                CLANG_ENABLE_OBJC_ARC = YES;
-                GCC_C_LANGUAGE_STANDARD = gnu17;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                SDKROOT = iphoneos;
-                SWIFT_VERSION = 5.0;
-            };
-            name = Release;
-        };
-
-        A80000010000000000000003 /* Debug */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-                CURRENT_PROJECT_VERSION = 1;
-                GENERATE_INFOPLIST_FILE = NO;
-                INFOPLIST_FILE = Info.plist;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                MARKETING_VERSION = 46.5.24;
-                PRODUCT_BUNDLE_IDENTIFIER = com.optionanalyzer.mobile;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = "1,2";
-            };
-            name = Debug;
-        };
-
-        A80000010000000000000004 /* Release */ = {
-            isa = XCBuildConfiguration;
-            buildSettings = {
-                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-                CURRENT_PROJECT_VERSION = 1;
-                GENERATE_INFOPLIST_FILE = NO;
-                INFOPLIST_FILE = Info.plist;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                MARKETING_VERSION = 46.5.24;
-                PRODUCT_BUNDLE_IDENTIFIER = com.optionanalyzer.mobile;
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos;
-                SWIFT_VERSION = 5.0;
-                TARGETED_DEVICE_FAMILY = "1,2";
-            };
-            name = Release;
-        };
- /* End XCBuildConfiguration section */
-
- /* Begin XCConfigurationList section */
-        A60000010000000000000001 /* Build configuration list for project */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                A80000010000000000000001 /* Debug */,
-                A80000010000000000000002 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
-
-        A60000010000000000000002 /* Build configuration list for OptionAnalyzer */ = {
-            isa = XCConfigurationList;
-            buildConfigurations = (
-                A80000010000000000000003 /* Debug */,
-                A80000010000000000000004 /* Release */,
-            );
-            defaultConfigurationIsVisible = 0;
-            defaultConfigurationName = Release;
-        };
- /* End XCConfigurationList section */
-
- };
- rootObject = A70000010000000000000001 /* Project object */;
- }
+    };
+    rootObject = 100000000000000000000001 /* Project object */;
+}
