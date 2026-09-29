@@ -104,15 +104,18 @@ jobs:
           echo "=========================================="
 
           required_files=(
-            "project.yml"
-            "OptionAnalyzerApp.swift"
-            "API/Models.swift"
-            "API/OptionAnalyzerAPIClient.swift"
-            "Views/ContentView.swift"
-            "Views/MTFRow.swift"
-            "Views/StageCard.swift"
-            "Info.plist"
-          )
+            "project.yml
+ OptionAnalyzer/AnalyzerViewModel.swift
+ OptionAnalyzer/APIModels.swift
+ OptionAnalyzer/APIService.swift
+ OptionAnalyzer/ContentView.swift
+ OptionAnalyzer/ExecutionView.swift
+ OptionAnalyzer/OptionAnalyzerApp.swift
+ API/APIConfig.swift
+ Views/DashboardView.swift
+ Views/StageAnalysisView.swift
+ Info.plist
+ )
 
           for file in "${required_files[@]}"; do
             if [ ! -f "$file" ]; then
