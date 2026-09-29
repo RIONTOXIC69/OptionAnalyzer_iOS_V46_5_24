@@ -367,31 +367,30 @@ jobs:
           echo " PACKAGING IOS APPLICATION"
           echo "=========================================="
 
-          APP_PATH="$PWD/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+          APP_PATH="${PWD}/build/Build/Products/Debug-iphoneos/OptionAnalyzer.app"
+          IPA_DIR="${PWD}/artifacts"
+          PAYLOAD_DIR="${IPA_DIR}/Payload"
+          IPA_PATH="${IPA_DIR}/OptionAnalyzer-iOS-Debug.ipa"
 
-          if [ ! -d "$APP_PATH" ]; then
+          if [ ! -d "${APP_PATH}" ]; then
             echo "ERROR: Application bundle not found."
             exit 1
           fi
 
-          rm -rf artifacts/OptionAnalyzer.app
+          rm -rf "${IPA_DIR}"
+          mkdir -p "${PAYLOAD_DIR}"
 
-          ditto \
-            "$APP_PATH" \
-            "artifacts/OptionAnalyzer.app"
+          ditto "${APP_PATH}" "${PAYLOAD_DIR}/OptionAnalyzer.app"
 
-          cd artifacts
-
-          rm -f OptionAnalyzer-iOS-Debug.zip
-
-          zip -r \
-            OptionAnalyzer-iOS-Debug.zip \
-            OptionAnalyzer.app
+          cd "${IPA_DIR}"
+          zip -r "${IPA_PATH}" Payload
 
           echo ""
-          echo "Package created:"
-          ls -lh OptionAnalyzer-iOS-Debug.zip
+          echo "IPA created:"
+          ls -lh "${IPA_PATH}"
 
+          echo "IPA contents:"
+          unzip -l "${IPA_PATH}"
       # ------------------------------------------------------------
       # UPLOAD ARTIFACT
       # ------------------------------------------------------------
@@ -400,5 +399,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OptionAnalyzer-iOS-Debug
-          path: artifacts/OptionAnalyzer-iOS-Debug.zip
+          path: artifacts/OptionAnalyzer-iOS-Debug.ipa
           if-no-files-found: error
