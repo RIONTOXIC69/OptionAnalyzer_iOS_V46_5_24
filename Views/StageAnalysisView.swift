@@ -1,4 +1,4 @@
-﻿import SwiftUI
+import SwiftUI
 
 struct StageAnalysisView: View {
     let stages: StageBundle?
@@ -18,8 +18,8 @@ struct StageAnalysisView: View {
             stageRow(
                 2,
                 "OI / Price Action",
-                stages?.oiPriceAction?.bias,
-                stages?.oiPriceAction?.detail
+                stages?.oiPriceAction.bias,
+                stages?.oiPriceAction.detail
             )
 
             stageRow(
