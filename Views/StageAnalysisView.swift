@@ -25,8 +25,8 @@ struct StageAnalysisView: View {
             stageRow(
                 3,
                 "Support / Resistance",
-                stages?.supportResistance?.decision,
-                stages?.supportResistance?.detail
+                stages?.supportResistance.decision,
+                stages?.supportResistance.detail
             )
 
             stageRow(
