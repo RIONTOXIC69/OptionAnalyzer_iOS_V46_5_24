@@ -32,43 +32,43 @@ struct StageAnalysisView: View {
             stageRow(
                 4,
                 "Market Structure",
-                stages?.marketStructure?.decision,
-                stages?.marketStructure?.trend
+                stages?.marketStructure.decision,
+                stages?.marketStructure.trend
             )
 
             stageRow(
                 5,
                 "Order Block",
-                stages?.orderBlock?.bias,
-                stages?.orderBlock?.type
+                stages?.orderBlock.bias,
+                stages?.orderBlock.type
             )
 
             stageRow(
                 6,
                 "Chart Pattern",
-                stages?.chartPattern?.bias,
-                stages?.chartPattern?.pattern
+                stages?.chartPattern.bias,
+                stages?.chartPattern.pattern
             )
 
             stageRow(
                 7,
                 "Elliott Wave",
-                stages?.elliottWave?.bias,
-                stages?.elliottWave?.wave
+                stages?.elliottWave.bias,
+                stages?.elliottWave.wave
             )
 
             stageRow(
                 8,
                 "Confirmation Candle",
-                stages?.confirmationCandle?.signal,
-                stages?.confirmationCandle?.detail
+                stages?.confirmationCandle.signal,
+                stages?.confirmationCandle.detail
             )
 
             stageRow(
                 9,
                 "Fibonacci Retracement",
-                stages?.fibonacci?.signal,
-                stages?.fibonacci?.detail
+                stages?.fibonacci.signal,
+                stages?.fibonacci.detail
             )
         }
         .padding()
