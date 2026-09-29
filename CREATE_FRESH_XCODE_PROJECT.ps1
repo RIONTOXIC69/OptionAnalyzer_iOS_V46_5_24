@@ -2,37 +2,37 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host ''
 Write-Host '============================================================'
-Write-Host ' CREATE FRESH XCODE PROJECT USING XCODEGEN'
+Write-Host ' CREATE / VERIFY XCODE PROJECT SPECIFICATION'
 Write-Host ' OptionAnalyzer iOS V46.5.24'
 Write-Host '============================================================'
 Write-Host ''
 
 $Root = (Get-Location).Path
-
 $ProjectName = 'OptionAnalyzer'
 $ProjectFile = Join-Path $Root 'OptionAnalyzer.xcodeproj'
 $ProjectSpec = Join-Path $Root 'project.yml'
-$BackupDir = Join-Path $Root 'OptionAnalyzer.xcodeproj.BROKEN_BACKUP'
 
 # ------------------------------------------------------------
-# 1. Verify source files
+# 1. Verify CURRENT source architecture
 # ------------------------------------------------------------
 
-Write-Host 'Checking required source files...'
+Write-Host 'Checking current source files...'
 Write-Host ''
 
 $RequiredFiles = @(
-    'OptionAnalyzerApp.swift'
-    'API\Models.swift'
-    'API\OptionAnalyzerAPIClient.swift'
-    'Views\ContentView.swift'
-    'Views\MTFRow.swift'
-    'Views\StageCard.swift'
+    'OptionAnalyzer\AnalyzerViewModel.swift'
+    'OptionAnalyzer\APIModels.swift'
+    'OptionAnalyzer\APIService.swift'
+    'OptionAnalyzer\ContentView.swift'
+    'OptionAnalyzer\ExecutionView.swift'
+    'OptionAnalyzer\OptionAnalyzerApp.swift'
+    'API\APIConfig.swift'
+    'Views\DashboardView.swift'
+    'Views\StageAnalysisView.swift'
     'Info.plist'
 )
 
 foreach ($File in $RequiredFiles) {
-
     $FullPath = Join-Path $Root $File
 
     if (-not (Test-Path -LiteralPath $FullPath -PathType Leaf)) {
@@ -45,114 +45,72 @@ foreach ($File in $RequiredFiles) {
 }
 
 Write-Host ''
-Write-Host 'All required source files found.'
+Write-Host 'All current source files found.'
 Write-Host ''
 
 # ------------------------------------------------------------
-# 2. Backup existing Xcode project
+# 2. Verify Swift file count
 # ------------------------------------------------------------
 
-if (Test-Path -LiteralPath $ProjectFile -PathType Container) {
+$SwiftFiles = Get-ChildItem `
+    (Join-Path $Root 'OptionAnalyzer'),
+    (Join-Path $Root 'API'),
+    (Join-Path $Root 'Views') `
+    -Recurse -File -Filter '*.swift'
 
-    Write-Host 'Existing OptionAnalyzer.xcodeproj detected.'
+Write-Host "Swift source file count: $($SwiftFiles.Count)"
 
-    if (Test-Path -LiteralPath $BackupDir -PathType Container) {
-        Write-Host 'Removing previous backup...'
-        Remove-Item -LiteralPath $BackupDir -Recurse -Force
-    }
-
-    Write-Host 'Moving existing project to backup...'
-    Move-Item -LiteralPath $ProjectFile -Destination $BackupDir
-
-    Write-Host 'Existing project backed up.'
-    Write-Host ''
-}
-
-# ------------------------------------------------------------
-# 3. Create XcodeGen specification
-# ------------------------------------------------------------
-
-Write-Host 'Creating project.yml...'
-Write-Host ''
-
-$YamlLines = @(
-    'name: OptionAnalyzer'
-    ''
-    'options:'
-    '  deploymentTarget:'
-    '    iOS: 17.0'
-    '  createIntermediateGroups: true'
-    ''
-    'configs:'
-    '  Debug: debug'
-    '  Release: release'
-    ''
-    'settings:'
-    '  base:'
-    '    SWIFT_VERSION: 5.0'
-    '    IPHONEOS_DEPLOYMENT_TARGET: 17.0'
-    '    SDKROOT: iphoneos'
-    '    TARGETED_DEVICE_FAMILY: 1,2'
-    ''
-    'targets:'
-    '  OptionAnalyzer:'
-    '    type: application'
-    '    platform: iOS'
-    '    deploymentTarget: 17.0'
-    ''
-    '    sources:'
-    '      - path: OptionAnalyzerApp.swift'
-    '      - path: API'
-    '      - path: Views'
-    ''
-    '    settings:'
-    '      base:'
-    '        PRODUCT_BUNDLE_IDENTIFIER: com.optionanalyzer.mobile'
-    '        PRODUCT_NAME: "$(TARGET_NAME)"'
-    '        MARKETING_VERSION: 46.5.24'
-    '        CURRENT_PROJECT_VERSION: 1'
-    '        INFOPLIST_FILE: Info.plist'
-    '        GENERATE_INFOPLIST_FILE: NO'
-    '        SWIFT_EMIT_LOC_STRINGS: YES'
-    '        CODE_SIGNING_ALLOWED: NO'
-    '        CODE_SIGNING_REQUIRED: NO'
-    '        CODE_SIGN_IDENTITY: ""'
-    ''
-    'schemes:'
-    '  OptionAnalyzer:'
-    '    build:'
-    '      targets:'
-    '        OptionAnalyzer: all'
-    '      parallelizeBuild: false'
-    '      buildImplicitDependencies: true'
-    '    run:'
-    '      config: Debug'
-    '    profile:'
-    '      config: Release'
-    '    analyze:'
-    '      config: Debug'
-    '    archive:'
-    '      config: Release'
-    '    management:'
-    '      shared: true'
-)
-
-$YamlLines | Set-Content -LiteralPath $ProjectSpec -Encoding UTF8
-
-if (-not (Test-Path -LiteralPath $ProjectSpec -PathType Leaf)) {
-    Write-Host 'ERROR: project.yml was not created.'
+if ($SwiftFiles.Count -ne 9) {
+    Write-Host "ERROR: Expected 9 Swift files, found $($SwiftFiles.Count)."
     exit 1
 }
 
-Write-Host 'project.yml created successfully.'
+Write-Host 'OK: 9 Swift source files.'
 Write-Host ''
 
 # ------------------------------------------------------------
-# 4. Show generated specification
+# 3. Verify current project.yml
+# ------------------------------------------------------------
+
+if (-not (Test-Path -LiteralPath $ProjectSpec -PathType Leaf)) {
+    Write-Host 'ERROR: project.yml not found.'
+    exit 1
+}
+
+Write-Host 'Current project.yml found.'
+Write-Host ''
+
+$Yaml = Get-Content -LiteralPath $ProjectSpec -Raw
+
+$RequiredYamlEntries = @(
+    'name: OptionAnalyzer'
+    '- path: OptionAnalyzer'
+    '- path: API'
+    '- path: Views'
+    'PRODUCT_BUNDLE_IDENTIFIER: com.optionanalyzer.mobile'
+    'INFOPLIST_FILE: Info.plist'
+    'GENERATE_INFOPLIST_FILE: NO'
+)
+
+foreach ($Entry in $RequiredYamlEntries) {
+    if ($Yaml -notlike "*$Entry*") {
+        Write-Host "ERROR: project.yml is missing: $Entry"
+        exit 1
+    }
+
+    Write-Host "  OK  $Entry"
+}
+
+Write-Host ''
+Write-Host 'project.yml architecture is valid.'
+Write-Host ''
+
+# ------------------------------------------------------------
+# 4. Show current specification
 # ------------------------------------------------------------
 
 Write-Host '============================================================'
-Write-Host ' GENERATED project.yml'
+Write-Host ' CURRENT project.yml'
 Write-Host '============================================================'
 Write-Host ''
 
@@ -163,7 +121,7 @@ Write-Host '============================================================'
 Write-Host ''
 
 # ------------------------------------------------------------
-# 5. Check whether XcodeGen exists locally
+# 5. Check XcodeGen availability
 # ------------------------------------------------------------
 
 $XcodeGenCommand = Get-Command xcodegen -ErrorAction SilentlyContinue
@@ -172,8 +130,8 @@ if ($null -eq $XcodeGenCommand) {
 
     Write-Host 'XcodeGen is not installed on this Windows computer.'
     Write-Host ''
-    Write-Host 'This is OK.'
-    Write-Host 'XcodeGen will run on the macOS GitHub Actions runner.'
+    Write-Host 'OK: No local Xcode project generation will be attempted.'
+    Write-Host 'The macOS GitHub Actions runner can execute XcodeGen.'
     Write-Host ''
 
 } else {
@@ -182,7 +140,7 @@ if ($null -eq $XcodeGenCommand) {
     Write-Host "  $($XcodeGenCommand.Source)"
     Write-Host ''
 
-    Write-Host 'Generating OptionAnalyzer.xcodeproj...'
+    Write-Host 'Generating OptionAnalyzer.xcodeproj from CURRENT project.yml...'
     Write-Host ''
 
     & xcodegen generate --spec $ProjectSpec
@@ -199,23 +157,7 @@ if ($null -eq $XcodeGenCommand) {
 }
 
 # ------------------------------------------------------------
-# 6. Verify project specification
-# ------------------------------------------------------------
-
-Write-Host '============================================================'
-Write-Host ' VERIFICATION'
-Write-Host '============================================================'
-Write-Host ''
-
-if (Test-Path -LiteralPath $ProjectSpec -PathType Leaf) {
-    Write-Host 'OK: project.yml exists.'
-} else {
-    Write-Host 'ERROR: project.yml does not exist.'
-    exit 1
-}
-
-# ------------------------------------------------------------
-# 7. If XcodeGen generated the project locally, verify it
+# 6. Verify generated project if present
 # ------------------------------------------------------------
 
 if (Test-Path -LiteralPath $ProjectFile -PathType Container) {
@@ -231,7 +173,9 @@ if (Test-Path -LiteralPath $ProjectFile -PathType Container) {
         exit 1
     }
 
-    $SchemeFile = Join-Path $ProjectFile 'xcshareddata\xcschemes\OptionAnalyzer.xcscheme'
+    $SchemeFile = Join-Path `
+        $ProjectFile `
+        'xcshareddata\xcschemes\OptionAnalyzer.xcscheme'
 
     if (Test-Path -LiteralPath $SchemeFile -PathType Leaf) {
         Write-Host 'OK: shared OptionAnalyzer scheme exists.'
@@ -241,26 +185,74 @@ if (Test-Path -LiteralPath $ProjectFile -PathType Container) {
 
 } else {
 
-    Write-Host 'OK: No local Xcode project expected on Windows.'
-    Write-Host 'The GitHub macOS runner will generate it with XcodeGen.'
+    Write-Host 'OK: No local Xcode project generated on this Windows machine.'
+    Write-Host 'The macOS build environment will generate it with XcodeGen.'
 }
 
 # ------------------------------------------------------------
-# 8. Final information
+# 7. Final source-contract checks
 # ------------------------------------------------------------
+
+Write-Host ''
+Write-Host '============================================================'
+Write-Host ' FINAL SOURCE CONTRACT CHECK'
+Write-Host '============================================================'
+Write-Host ''
+
+$SourceFiles = Get-ChildItem `
+    (Join-Path $Root 'OptionAnalyzer'),
+    (Join-Path $Root 'API'),
+    (Join-Path $Root 'Views') `
+    -Recurse -File -Filter '*.swift'
+
+$Obsolete = $SourceFiles |
+    Select-String -Pattern '\b(StageContainer|StatusResponse|APIResponse|DashboardModel|AppState)\b'
+
+if ($Obsolete) {
+    Write-Host 'ERROR: Obsolete contract references found:'
+    $Obsolete | ForEach-Object {
+        Write-Host ("  " + $_.Path.Replace($Root + '\','') + " : " + $_.Line.Trim())
+    }
+    exit 1
+}
+
+Write-Host 'OK: No obsolete API/model contract references.'
+
+$DashboardAPI = Select-String `
+    -Path (Join-Path $Root 'Views\DashboardView.swift') `
+    -Pattern '\bAPIService\b|api\.'
+
+if ($DashboardAPI) {
+    Write-Host 'ERROR: DashboardView still contains direct APIService/API references.'
+    $DashboardAPI | ForEach-Object {
+        Write-Host ("  " + $_.Line.Trim())
+    }
+    exit 1
+}
+
+Write-Host 'OK: DashboardView uses AnalyzerViewModel as UI state owner.'
+
+$APIConstruction = $SourceFiles |
+    Select-String -Pattern '\bAPIService\s*\('
+
+if (($APIConstruction | Measure-Object).Count -ne 1) {
+    Write-Host 'ERROR: Unexpected APIService construction count.'
+    $APIConstruction | ForEach-Object {
+        Write-Host ("  " + $_.Path.Replace($Root + '\','') + " : " + $_.Line.Trim())
+    }
+    exit 1
+}
+
+Write-Host 'OK: APIService has a single singleton construction.'
 
 Write-Host ''
 Write-Host '============================================================'
 Write-Host ' DONE'
 Write-Host '============================================================'
 Write-Host ''
-Write-Host 'Created:'
-Write-Host "  $ProjectSpec"
+Write-Host 'No Swift source files were modified.'
+Write-Host 'No project.yml regeneration was performed.'
+Write-Host 'The existing current project.yml was preserved.'
 Write-Host ''
-Write-Host 'Important:'
-Write-Host '  Do NOT manually edit project.pbxproj.'
-Write-Host '  GitHub Actions will generate the Xcode project using XcodeGen.'
-Write-Host ''
-Write-Host 'Next command:'
-Write-Host '  git status --short'
+Write-Host 'Next step: run this script, then validate the macOS/Xcode build.'
 Write-Host ''
